@@ -1,0 +1,57 @@
+.page {
+  max-width: 900px;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  color: #57606a;
+  margin-bottom: 28px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.cardIcon {
+  font-size: 1.75rem;
+}
+
+.cardValue {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1f2328;
+}
+
+.cardLabel {
+  font-size: 0.8rem;
+  color: #57606a;
+  text-align: center;
+}
+
+.placeholder {
+  background: #f7f8fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px 24px;
+  color: #57606a;
+  font-size: 0.9rem;
+}
