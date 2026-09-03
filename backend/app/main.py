@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
 from app.database import init_db
 from app.api import health
+from app.api import materials, learning_paths, quizzes, revision, chat, progress
 
 settings = get_settings()
 
@@ -32,13 +33,13 @@ def create_app() -> FastAPI:
         title=settings.APP_NAME,
         version=settings.APP_VERSION,
         description=(
-            "Study Buddy API — AI-powered study assistant. "
-            "Foundation layer: health check and DB connectivity only. "
-            "Feature endpoints are added in subsequent sessions."
+            "Study Buddy API — AI-powered study assistant with LLM-driven "
+            "ingestion, quizzes, learning paths, revision scheduling, and chat."
         ),
         docs_url="/docs",
         redoc_url="/redoc",
         lifespan=lifespan,
+        redirect_slashes=False,
     )
 
     # ── CORS ─────────────────────────────────────────────────────────────────
@@ -52,16 +53,12 @@ def create_app() -> FastAPI:
 
     # ── Routers ───────────────────────────────────────────────────────────────
     app.include_router(health.router)
-
-    # TODO (Session 2): add ingestion router
-    # from app.api import ingestion
-    # app.include_router(ingestion.router)
-
-    # TODO (Session 3): add learning path router
-    # TODO (Session 4): add quiz router
-    # TODO (Session 5): add explain router
-    # TODO (Session 6): add revision router
-    # TODO (Session 7): add chatbot router
+    app.include_router(materials.router)
+    app.include_router(learning_paths.router)
+    app.include_router(quizzes.router)
+    app.include_router(revision.router)
+    app.include_router(chat.router)
+    app.include_router(progress.router)
 
     return app
 

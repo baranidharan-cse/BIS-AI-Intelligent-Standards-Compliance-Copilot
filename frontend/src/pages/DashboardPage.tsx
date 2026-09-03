@@ -1,29 +1,73 @@
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { api } from '../api/client'
+import type { DashboardStats } from '../api/types'
 import styles from './DashboardPage.module.css'
 
-/**
- * Dashboard — landing page after login.
- * Session 1: skeleton only. Will show progress summary, upcoming revisions,
- * and quick-access cards in a future session.
- */
 export default function DashboardPage() {
+  const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    api
+      .getDashboardStats()
+      .then(setStats)
+      .catch((e: Error) => setError(e.message))
+      .finally(() => setLoading(false))
+  }, [])
+
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>Dashboard</h1>
-      <p className={styles.subtitle}>
-        Welcome to Study Buddy. Your learning overview will appear here once you
-        upload your first material.
-      </p>
+      <p className={styles.subtitle}>Your learning overview at a glance.</p>
 
-      <div className={styles.grid}>
-        <StatCard label="Materials" value="0" icon="📚" />
-        <StatCard label="Concepts Mastered" value="0%" icon="🧠" />
-        <StatCard label="Study Streak" value="0 days" icon="🔥" />
-        <StatCard label="Due for Revision" value="0" icon="🔁" />
-      </div>
+      {loading && <div className={styles.spinner} aria-label="Loading…" />}
+      {error && <div className={styles.error}>⚠ {error}</div>}
 
-      <div className={styles.placeholder}>
-        <p>📂 Upload a study document in <strong>My Materials</strong> to get started.</p>
-      </div>
+      {!loading && !error && stats && (
+        <>
+          <div className={styles.grid}>
+            <StatCard label="Total Materials" value={String(stats.total_materials)} icon="📚" />
+            <StatCard
+              label="Concepts Mastered"
+              value={`${stats.mastered_concepts} (${Math.round(stats.avg_mastery_pct)}%)`}
+              icon="🧠"
+            />
+            <StatCard label="Study Streak" value="0 days" icon="🔥" />
+            <StatCard label="Due for Revision" value={String(stats.due_today)} icon="🔁" />
+          </div>
+
+          {stats.total_quizzes_taken > 0 && (
+            <div className={styles.quizStat}>
+              <span>📝 Quizzes taken: <strong>{stats.total_quizzes_taken}</strong></span>
+              <span>Average score: <strong>{Math.round(stats.avg_quiz_score)}%</strong></span>
+            </div>
+          )}
+
+          <div className={styles.actions}>
+            <h2 className={styles.sectionTitle}>Quick Actions</h2>
+            <div className={styles.actionRow}>
+              <button className={styles.actionBtn} onClick={() => navigate('/materials')}>
+                📂 Upload Material
+              </button>
+              <button className={styles.actionBtn} onClick={() => navigate('/practice')}>
+                ✏️ Start Quiz
+              </button>
+              <button className={styles.actionBtn} onClick={() => navigate('/revision')}>
+                🔁 View Schedule
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {!loading && !error && !stats && (
+        <div className={styles.placeholder}>
+          <p>📂 Upload a study document in <strong>My Materials</strong> to get started.</p>
+        </div>
+      )}
     </div>
   )
 }

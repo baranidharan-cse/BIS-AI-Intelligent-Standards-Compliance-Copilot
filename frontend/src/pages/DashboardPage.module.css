@@ -9,8 +9,31 @@
 }
 
 .subtitle {
-  color: #57606a;
+  color: #525252;
   margin-bottom: 28px;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e0e0e0;
+  border-top-color: #0f62fe;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 40px auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error {
+  background: #fff0f0;
+  border: 1px solid #da1e28;
+  color: #da1e28;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
 }
 
 .grid {
@@ -22,13 +45,14 @@
 
 .card {
   background: #fff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
 .cardIcon {
@@ -38,20 +62,70 @@
 .cardValue {
   font-size: 1.4rem;
   font-weight: 700;
-  color: #1f2328;
+  color: #161616;
 }
 
 .cardLabel {
   font-size: 0.8rem;
-  color: #57606a;
+  color: #525252;
   text-align: center;
 }
 
-.placeholder {
-  background: #f7f8fa;
-  border: 1px solid #e5e7eb;
+.quizStat {
+  display: flex;
+  gap: 24px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 14px 20px;
+  margin-bottom: 28px;
+  font-size: 0.9rem;
+  color: #525252;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.actions {
+  background: #fff;
+  border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 20px 24px;
-  color: #57606a;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 14px;
+  color: #161616;
+}
+
+.actionRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.actionBtn {
+  padding: 10px 20px;
+  background: #0f62fe;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+
+.actionBtn:hover {
+  background: #0353e9;
+}
+
+.placeholder {
+  background: #f4f4f4;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px 24px;
+  color: #525252;
   font-size: 0.9rem;
 }

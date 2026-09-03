@@ -1,5 +1,20 @@
 /* Global reset and base styles */
 
+:root {
+  --color-primary: #0f62fe;
+  --color-primary-hover: #0353e9;
+  --color-success: #24a148;
+  --color-warning: #f1c21b;
+  --color-danger: #da1e28;
+  --color-bg: #f4f4f4;
+  --color-surface: #ffffff;
+  --color-border: #e0e0e0;
+  --color-text: #161616;
+  --color-text-muted: #525252;
+  --radius: 8px;
+  --shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;

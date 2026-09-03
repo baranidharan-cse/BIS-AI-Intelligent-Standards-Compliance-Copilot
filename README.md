@@ -1,311 +1,205 @@
 # Study Buddy 🎓
 
-An AI-powered study assistant that ingests your documents, generates structured
-learning paths, quizzes, explanations, and revision schedules — all powered by
-an LLM backend (IBM watsonx.ai or demo mode).
-
-> **Session 1 — Foundation Layer only.**
-> Feature pages are placeholder shells. Ingestion, quiz, explain, revision,
-> and chatbot are implemented in subsequent sessions.
+> An AI-powered study companion — upload your material, get a personalised learning path, practise with AI-generated quizzes, stay on track with a spaced-repetition revision schedule, and ask questions to your AI tutor — all powered by **IBM watsonx.ai**.
 
 ---
 
-## Architecture Overview
+## Problem
 
-```
-study-buddy/
-├── backend/          FastAPI (Python 3.12)
-│   └── app/
-│       ├── api/          HTTP route handlers (thin, delegate to services)
-│       ├── models/       SQLAlchemy ORM models (no business logic)
-│       ├── repositories/ Data-access layer (no business logic)
-│       ├── services/     Business logic + LLM abstraction
-│       │   └── llm/      BaseLLMService · DemoLLMService · (WatsonxLLMService TODO)
-│       ├── config.py     Pydantic Settings — all env vars in one place
-│       ├── database.py   Async SQLAlchemy engine, session factory, init_db()
-│       └── main.py       FastAPI app factory + lifespan
-├── frontend/         React 18 + TypeScript + Vite
-│   └── src/
-│       ├── components/
-│       │   ├── common/   Shared UI components (PlaceholderPage, etc.)
-│       │   └── layout/   AppShell (sidebar navigation)
-│       ├── pages/        One file per nav item (9 pages)
-│       ├── styles/       Global CSS
-│       └── App.tsx       React Router routing tree
-└── data/
-    └── samples/      Sample study documents for ingestion
-```
+Students face three interconnected problems:
 
-**Key design principles:**
-- Repositories have **zero** business logic — only data access.
-- Services own all business rules and orchestrate LLM calls.
-- The LLM layer is fully abstracted: swap `demo` → `watsonx` by changing one env var.
-- `DATABASE_URL` is the only change needed to move from SQLite → Postgres.
+1. **Information overload** — reading alone doesn't create retention; passive study is inefficient.
+2. **No personalisation** — every student gets the same textbook but learns differently.
+3. **Forgotten material** — without structured review, 80 % of new knowledge is forgotten within a week (Ebbinghaus Forgetting Curve).
+
+Study Buddy solves all three: it *structures* your material into atomic concepts, *personalises* the learning path, *tests* understanding with adaptive quizzes, and *schedules* revision at scientifically optimal intervals.
 
 ---
 
-## Folder Structure
+## Features
 
-```
-study-buddy/
-├── SPEC.md                          Product spec (replace placeholder with real spec)
-├── README.md
-├── backend/
-│   ├── requirements.txt
-│   ├── .env.example
-│   └── app/
-│       ├── __init__.py
-│       ├── config.py
-│       ├── database.py
-│       ├── main.py
-│       ├── api/
-│       │   ├── __init__.py
-│       │   └── health.py
-│       ├── models/
-│       │   ├── __init__.py
-│       │   ├── material.py          Material · Section · Concept
-│       │   ├── learning_path.py     LearningPath · LearningStep
-│       │   ├── quiz.py              Quiz · QuizQuestion · QuizAttempt
-│       │   ├── revision.py          RevisionPlan · RevisionTask
-│       │   ├── chat.py              ChatMessage
-│       │   └── progress.py          ConceptMastery · MaterialProgress
-│       ├── repositories/
-│       │   ├── __init__.py
-│       │   ├── base.py              Generic CRUD BaseRepository[T]
-│       │   ├── material_repository.py
-│       │   ├── learning_path_repository.py
-│       │   ├── quiz_repository.py
-│       │   ├── revision_repository.py
-│       │   ├── chat_repository.py
-│       │   └── progress_repository.py
-│       └── services/
-│           └── llm/
-│               ├── __init__.py
-│               ├── base.py          BaseLLMService (ABC) + get_llm_service() factory
-│               └── demo.py          DemoLLMService — deterministic sample responses
-├── frontend/
-│   ├── package.json
-│   ├── vite.config.ts
-│   ├── tsconfig.json
-│   ├── index.html
-│   └── src/
-│       ├── main.tsx
-│       ├── App.tsx                  React Router tree
-│       ├── styles/
-│       │   └── global.css
-│       ├── components/
-│       │   ├── common/
-│       │   │   ├── PlaceholderPage.tsx
-│       │   │   └── PlaceholderPage.module.css
-│       │   └── layout/
-│       │       ├── AppShell.tsx
-│       │       └── AppShell.module.css
-│       └── pages/
-│           ├── DashboardPage.tsx    (skeleton with stat cards)
-│           ├── MyMaterialsPage.tsx  (placeholder — Session 2)
-│           ├── LearningPathPage.tsx (placeholder — Session 3)
-│           ├── StudyPage.tsx        (placeholder — Session 4)
-│           ├── PracticePage.tsx     (placeholder — Session 5)
-│           ├── RevisionPage.tsx     (placeholder — Session 6)
-│           ├── AskBuddyPage.tsx     (placeholder — Session 7)
-│           ├── SettingsPage.tsx     (placeholder)
-│           └── ProfilePage.tsx      (placeholder)
-└── data/
-    └── samples/
-        └── python_programming_fundamentals.txt
-```
+| Feature | Description |
+|---|---|
+| 📥 **Material Ingestion** | Paste text or upload `.txt` files — IBM watsonx.ai extracts sections and atomic concepts automatically |
+| 🗺️ **Learning Path** | AI generates a step-by-step study roadmap (Read → Practise → Reflect) with time estimates; track progress inline |
+| 📖 **Study Reader** | Browse sections and concepts with definitions and code examples in a clean accordion reader |
+| ✏️ **Adaptive Quizzes** | MCQ, true/false, and short-answer questions; concept mastery scores updated after every attempt |
+| 🔁 **Spaced Repetition** | Auto-scheduled revision tasks at 1 → 3 → 7 → 14 → 30-day intervals, adjusted by per-concept mastery score |
+| 💬 **Ask Buddy** | Multi-turn chatbot grounded in your material; persistent session history; contextual follow-up suggestions |
+| 🎤 **Voice Mode** | Speak questions, hear answers — `BaseSpeechService` abstraction ready for IBM Watson STT/TTS |
+| 📊 **Dashboard** | Live stats — materials loaded, concepts mastered, quizzes taken, revision tasks due today |
 
 ---
 
-## Setup Instructions
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                React / TypeScript UI                     │
+│  Dashboard · Materials · Study · Practice · Revision ... │
+│               src/api/client.ts (typed fetch)            │
+└────────────────────────┬────────────────────────────────┘
+                         │  REST JSON
+┌────────────────────────▼────────────────────────────────┐
+│              FastAPI (async)  —  app/api/                │
+│  /materials · /learning-paths · /quizzes                 │
+│  /revision  · /chat  · /progress                        │
+└────────────────────────┬────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────┐
+│           Business logic  —  app/services/               │
+│  MaterialService · LearningPathService · QuizService     │
+│  RevisionService · ChatService · ProgressService         │
+│                                                          │
+│  ┌──────────────────────────────────────────────────┐   │
+│  │         LLM Abstraction  —  services/llm/        │   │
+│  │  BaseLLMService                                  │   │
+│  │    ├─ DemoLLMService     (no credentials)        │   │
+│  │    └─ WatsonxLLMService  (ibm-watsonx-ai SDK)    │   │
+│  └──────────────────────────────────────────────────┘   │
+└────────────────────────┬────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────┐
+│           Data access  —  app/repositories/              │
+│  MaterialRepository · QuizRepository · ChatRepository …  │
+└────────────────────────┬────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────┐
+│        SQLAlchemy ORM models  —  app/models/             │
+│  Material · Section · Concept · LearningPath             │
+│  Quiz · RevisionPlan · ChatMessage · ConceptMastery …    │
+│                                                          │
+│        SQLite (dev)   ↔   PostgreSQL (prod)             │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Key design principle:** business logic never bypasses layers. Every API handler calls a service; every service calls a repository; no handler touches the DB directly.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React 18 · TypeScript · Vite · CSS Modules |
+| Backend | Python 3.12 · FastAPI · SQLAlchemy 2 (async) · Pydantic v2 |
+| Database | SQLite (development) · PostgreSQL-ready (swap `DATABASE_URL`) |
+| AI / LLM | IBM watsonx.ai · `ibm/granite-13b-instruct-v2` via `ibm-watsonx-ai` SDK |
+| Speech | Web Speech API (browser) · `BaseSpeechService` abstraction for IBM Watson STT/TTS |
+
+---
+
+## Why IBM watsonx.ai?
+
+- **Enterprise-grade reliability** — watsonx.ai is IBM's production AI platform, not a hobby API. It provides the governance and SLAs needed for real educational tools.
+- **Granite models are instruction-tuned** — IBM's Granite models excel at structured, JSON-output tasks like concept extraction and quiz generation — exactly what Study Buddy needs.
+- **One env var to switch** — set `LLM_PROVIDER=watsonx` in `.env`; every service and API route continues to work identically because nothing knows which LLM is behind the interface.
+- **Privacy-ready** — watsonx.ai supports data residency on IBM Cloud, important for student data in regulated markets.
+
+---
+
+## How IBM Bob Built This
+
+Study Buddy was designed and implemented in **IBM Bob (Agent mode)**:
+
+1. Bob read the full repo first — architecture decisions in `README.md` were respected, not overridden.
+2. Bob planned a **parallel execution** across five independent tracks (services, API routes, LLM layer, frontend, voice) using its subagent capability — each track ran simultaneously.
+3. Bob preserved the **layered architecture** without collapsing shortcuts — repositories stay pure data access, services own all business logic.
+4. Bob implemented the **real `WatsonxLLMService`** using JSON-output prompts with `ibm-watsonx-ai` SDK, including regex fallback JSON parsing.
+5. Bob wrote the **pytest test suite** for quiz scoring and spaced-repetition scheduling.
+6. Bob ran **live end-to-end API tests** after each backend track — curl tests against a running uvicorn server to verify real database writes.
+
+Full session log: [`BOB_SESSION.md`](BOB_SESSION.md)
+
+---
+
+## Quick Start
 
 ### Prerequisites
-- Python 3.12+
-- Node.js 20+
-- (Optional) `python-venv` or `conda`
+- Python 3.12 + pip
+- Node.js 18 + npm
 
 ### Backend
-
 ```bash
-cd study-buddy/backend
-
-# 1. Create and activate a virtual environment
-python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
-
-# 2. Install dependencies
+cd backend
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-
-# 3. Create your .env file
-cp .env.example .env
-# Edit .env if needed — defaults work for local dev with demo LLM provider
-
-# 4. Start the server
-uvicorn app.main:app --reload --port 8000
+cp .env.example .env        # edit if needed — defaults work out of the box
+python seed.py              # pre-load demo data (takes ~2 s, no API calls)
+uvicorn app.main:app --reload
+# API docs → http://localhost:8000/docs
 ```
-
-The API will be available at `http://localhost:8000`.
-Interactive docs: `http://localhost:8000/docs`
 
 ### Frontend
-
 ```bash
-cd study-buddy/frontend
-
-# 1. Install dependencies
+cd frontend
 npm install
-
-# 2. Start the dev server
 npm run dev
+# App → http://localhost:5173
 ```
 
-The frontend will be available at `http://localhost:5173`.
-All `/api/*` requests are proxied to the backend automatically.
+### Enable IBM watsonx.ai
+
+```bash
+# In backend/.env:
+LLM_PROVIDER=watsonx
+WATSONX_API_KEY=your_ibm_cloud_api_key
+WATSONX_PROJECT_ID=your_project_id
+WATSONX_URL=https://us-south.ml.cloud.ibm.com
+WATSONX_MODEL_ID=ibm/granite-13b-instruct-v2
+
+pip install ibm-watsonx-ai>=1.0.0
+```
+
+### Run Tests
+```bash
+cd backend && pytest
+```
+
+---
+
+## Project Structure
+
+```
+study-buddy/
+├── backend/
+│   ├── app/
+│   │   ├── api/              # FastAPI routers — one file per domain
+│   │   ├── services/
+│   │   │   └── llm/          # BaseLLMService · DemoLLMService · WatsonxLLMService
+│   │   ├── repositories/     # Async SQLAlchemy data access (pure CRUD + queries)
+│   │   └── models/           # SQLAlchemy ORM models
+│   ├── tests/                # pytest test suite
+│   ├── seed.py               # Demo data seed (no LLM calls, instant)
+│   └── requirements.txt
+├── frontend/
+│   └── src/
+│       ├── api/              # client.ts (typed fetch) · types.ts
+│       ├── components/       # AppShell layout, shared components
+│       ├── pages/            # One component per route
+│       └── services/speech/  # BaseSpeechService · BrowserSpeechService
+├── data/samples/             # Sample study material text
+├── DEMO.md                   # 4-minute judge walkthrough script
+└── BOB_SESSION.md            # IBM Bob session log
+```
 
 ---
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|---|---|---|
-| `APP_NAME` | `Study Buddy` | Application display name |
-| `DEBUG` | `false` | Enable SQLAlchemy query logging |
-| `DATABASE_URL` | `sqlite+aiosqlite:///./study_buddy.db` | Database connection string |
-| `LLM_PROVIDER` | `demo` | `demo` or `watsonx` |
-| `WATSONX_API_KEY` | _(empty)_ | IBM Cloud API key — required for watsonx |
-| `WATSONX_PROJECT_ID` | _(empty)_ | watsonx project ID |
-| `WATSONX_URL` | `https://us-south.ml.cloud.ibm.com` | watsonx regional endpoint |
-| `WATSONX_MODEL_ID` | `ibm/granite-13b-instruct-v2` | Foundation model to use |
-| `FRONTEND_ORIGIN` | `http://localhost:5173` | CORS-allowed frontend origin |
-
-See [`backend/.env.example`](backend/.env.example) for the full reference with comments.
-
----
-
-## Health Check
-
-```bash
-curl http://localhost:8000/api/health
-```
-
-**Expected response (demo mode, DB connected):**
-```json
-{
-  "status": "ok",
-  "timestamp": "2024-01-15T10:30:00.000000+00:00",
-  "version": "0.1.0",
-  "llm_provider": "demo",
-  "database": "connected"
-}
-```
-
----
-
-## Implemented vs. Deferred
-
-### ✅ Implemented (Session 1)
-
-| Layer | What's built |
-|---|---|
-| Project structure | Full folder layout, all packages, `__init__` files |
-| Config | `Settings` via Pydantic Settings, `.env.example`, `get_settings()` |
-| Database | Async SQLAlchemy engine, session factory, `init_db()`, `get_db()` |
-| Models | All 12 ORM models across 6 files |
-| Repositories | `BaseRepository[T]` + 7 concrete repositories, all with domain-specific queries |
-| LLM abstraction | `BaseLLMService` (ABC) with 5 method signatures + typed DTOs |
-| DemoLLMService | Fully implemented with realistic shaped responses for all 5 methods |
-| WatsonxLLMService | `TODO` marker with full constructor signature documented |
-| LLM factory | `get_llm_service()` wires provider from env var |
-| Health endpoint | `GET /api/health` — DB ping + provider info |
-| Sample data | Python Programming Fundamentals text (7 topics, 253 lines) |
-| Frontend shell | React Router, AppShell sidebar, 9 placeholder pages |
-| README | This file |
-
-### 🔜 Deferred (future sessions)
-
-| Feature | Session | Notes |
-|---|---|---|
-| Ingestion pipeline | Session 2 | PDF/text/URL → sections → concepts via LLM |
-| Learning Path generator | Session 3 | Calls `generate_learning_path()` |
-| Explain Engine | Session 4 | Calls `explain_topic()`, section reader UI |
-| Quiz Engine | Session 5 | Calls `generate_quiz()`, attempt tracking |
-| Revision Planner | Session 6 | Spaced repetition, due-today list |
-| Chatbot | Session 7 | Calls `answer_question()`, session history |
-| WatsonxLLMService | Session 2+ | `ibm-watsonx-ai` SDK integration |
-| Authentication | TBD | No user model yet — single-user mode assumed |
-| Alembic migrations | TBD | `create_all` used now; swap when schema stabilises |
+See [`.env.example`](backend/.env.example) for all variables with inline documentation.
 
 ---
 
 ## Assumptions
 
-> These decisions were made without access to the full SPEC.md. Review and
-> override in the next session after adding the real spec.
-
-1. **Single-user, no auth.** There is no `User` model. All data belongs to one
-   implicit user. If SPEC.md requires multi-user, add a `User` model and FK
-   relations in Session 2.
-
-2. **SQLite for local dev, Postgres-ready.** `DATABASE_URL` uses
-   `sqlite+aiosqlite://` by default. Switching to `postgresql+asyncpg://` requires
-   no code changes — only the env var and installing `asyncpg`.
-
-3. **`create_all` instead of Alembic.** Alembic migration tracking is not set up.
-   `init_db()` runs `create_all` on every startup (idempotent). Add Alembic when
-   the schema is stable enough to track migrations.
-
-4. **`options` and `answers` stored as JSON text.** Quiz question options and
-   attempt answers are stored as JSON strings in `Text` columns rather than
-   JSONB. This works on SQLite; on Postgres, replace with `JSONB` columns for
-   queryability.
-
-5. **No file storage abstraction.** Uploaded files are saved to local disk
-   (`source_path`). A future session should introduce an `StorageService`
-   interface (local / S3 / COS) before the ingestion feature is built.
-
-6. **Watsonx model default.** `WATSONX_MODEL_ID=ibm/granite-13b-instruct-v2`
-   was chosen as the default. Update to `ibm/granite-3-8b-instruct` or whichever
-   model SPEC.md specifies.
-
-7. **Frontend: no auth guards.** All routes are accessible without login.
-   If authentication is required, add route guards in `App.tsx` in a later session.
-
-8. **Frontend: no API client yet.** Pages are placeholders — no `fetch`/`axios`
-   calls to the backend. A typed API client (e.g. using `openapi-fetch`) will be
-   added when feature endpoints exist.
+- **Single-user** — no auth/multi-tenant; suitable for demo and personal use.
+- **SQLite by default** — no database setup required; swap `DATABASE_URL` for Postgres in production.
+- **`create_all` on startup** — tables are created automatically; not for production schema management (use Alembic for migrations in production).
+- **Demo provider** — `LLM_PROVIDER=demo` (default) uses `DemoLLMService` which produces realistic, varied output without any API keys. The app is fully functional end-to-end in demo mode.
 
 ---
 
-## API Endpoints
+## Licence
 
-> ⬜ **Placeholder** — will be populated as features are built in later sessions.
-
-| Method | Path | Description | Session |
-|---|---|---|---|
-| `GET` | `/api/health` | Health check | ✅ Session 1 |
-| `POST` | `/api/materials` | Upload material | Session 2 |
-| `GET` | `/api/materials/{id}/learning-path` | Get learning path | Session 3 |
-| `GET` | `/api/concepts/{id}/explain` | Explain a concept | Session 4 |
-| `POST` | `/api/materials/{id}/quiz` | Generate quiz | Session 5 |
-| `GET` | `/api/revision/due-today` | Today's revision tasks | Session 6 |
-| `POST` | `/api/chat` | Ask Buddy chatbot | Session 7 |
-
----
-
-## Demo Mode Walkthrough
-
-> ⬜ **Placeholder** — will be written in Session 2 once ingestion is live.
-
----
-
-## Deployment Notes
-
-> ⬜ **Placeholder** — will be written once the full feature set is implemented.
-
-Key considerations for later:
-- Switch `DATABASE_URL` to PostgreSQL in production.
-- Set `LLM_PROVIDER=watsonx` and fill in watsonx credentials.
-- Use a proper secret manager (IBM Secrets Manager / AWS Secrets Manager) instead of `.env`.
-- Add `alembic` for database migrations.
-- Set `FRONTEND_ORIGIN` to the production domain.
-- Add a reverse proxy (nginx / Caddy) in front of uvicorn.
+MIT

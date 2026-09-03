@@ -213,19 +213,12 @@ def get_llm_service() -> BaseLLMService:
         return DemoLLMService()
 
     if provider == "watsonx":
-        # TODO (Session 2): Implement WatsonxLLMService
-        # Expected constructor signature:
-        #   WatsonxLLMService(
-        #       api_key: str = settings.WATSONX_API_KEY,
-        #       project_id: str = settings.WATSONX_PROJECT_ID,
-        #       url: str = settings.WATSONX_URL,
-        #       model_id: str = settings.WATSONX_MODEL_ID,
-        #   )
-        # Use the ibm-watsonx-ai SDK:
-        #   from ibm_watsonx_ai.foundation_models import ModelInference
-        raise NotImplementedError(
-            "WatsonxLLMService is not yet implemented. "
-            "Set LLM_PROVIDER=demo to use the demo provider."
+        from app.services.llm.watsonx import WatsonxLLMService
+        return WatsonxLLMService(
+            api_key=settings.WATSONX_API_KEY,
+            project_id=settings.WATSONX_PROJECT_ID,
+            url=settings.WATSONX_URL,
+            model_id=settings.WATSONX_MODEL_ID,
         )
 
     raise ValueError(
